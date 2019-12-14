@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded" , () =>{
     let start = document.querySelector("#start");
     let draw = document.querySelector("#draw");
+    let stay = document.querySelector("#stay");
     let userScoreDisplay = document.querySelector("#userScoreDisplay");
     let cardDisplay = document.querySelector("#cardDisplay");
     let computerScoreDisplay = document.querySelector("#computerScoreDisplay");
@@ -20,19 +21,37 @@ document.addEventListener("DOMContentLoaded" , () =>{
             console.log(err)
         }
     }
-    //drawing cards
     getDeck()
+    //reset game
+    const reset = () =>{
+        document.body.removeChild(start)
+        document.body.removeChild(draw)
+        document.body.removeChild(stay)
+        let button = document.createElement("button")
+        button.innerText = "New Game"
+        button.id = `newButton`
+        document.body.appendChild(button)
+        button.addEventListener("click" , () =>{
+            document.location.reload(true)
+        })
+    }
     // checking scores 
-    const checkScores = (score) =>{
+    const checkScores = (name, score) =>{
         if(score < 21) {
             winner.innerText = ""
         } else if(score === 21){
-            winner.innerText= "You win"
+            winner.innerText= `${name} WIN`
+            reset();
         } else {
-            winner.innerText = "You lose"
+            winner.innerText = `${name} BUSTED`
+            reset();
         }
     }
-    
+
+    //check if draw
+    // checkDraw = (userScore, computerScore) =>{
+    //     if(userScore === computerScore)
+    // }
     //sets values
     const valuesofCards = (value, score) =>{
         if(value === "JACK" || value === "QUEEN" || value === "KING"){
@@ -50,7 +69,7 @@ document.addEventListener("DOMContentLoaded" , () =>{
     }
 
     //draws two cards on first hit
-    const drawTwoCards = async (id, score, player, display) =>{
+    const drawTwoCards = async (name, id, score, player, display) =>{
         try{
             let cardres = await axios.get(`https://deckofcardsapi.com/api/deck/${id}/draw/?count=2`);
             for(let i = 0; i < 2; i++){
@@ -62,7 +81,7 @@ document.addEventListener("DOMContentLoaded" , () =>{
                 player.innerText = `Score: ${score}`
                 display.appendChild(image);
             }
-            checkScores(score)
+            checkScores(name, score)
             return score
         }
         catch(err){
@@ -70,7 +89,7 @@ document.addEventListener("DOMContentLoaded" , () =>{
         }
     }
 
-    const drawOneCard = async (id, score, player, display) =>{
+    const drawOneCard = async (name, id, score, player, display) =>{
         try {
             let cardres = await axios.get(`https://deckofcardsapi.com/api/deck/${id}/draw/?count=1`);
             let oneCardValue = cardres.data.cards[0].value;
@@ -80,7 +99,7 @@ document.addEventListener("DOMContentLoaded" , () =>{
             image.src = imgUrl;
             player.innerText = `Score: ${score}`
             display.appendChild(image);
-            checkScores(score)
+            checkScores(name, score)
             return score
         }
         catch(err){
@@ -89,14 +108,22 @@ document.addEventListener("DOMContentLoaded" , () =>{
     }
 
     start.addEventListener("click", async () => {
-        userScore = await drawTwoCards(deckId, userScore, userScoreDisplay, cardDisplay)
-        computerScore = await drawTwoCards(deckId, computerScore, computerScoreDisplay, computerCard)
+        if(!cardDisplay.firstChild){
+            userScore = await drawTwoCards("YOU", deckId, userScore, userScoreDisplay, cardDisplay)
+        }
     })
 
     draw.addEventListener("click" , async () => {
         if(cardDisplay.firstChild){
-            userScore = await drawOneCard(deckId, userScore, userScoreDisplay, cardDisplay)
-            computerScore = await drawOneCard(deckId, computerScore, computerScoreDisplay, computerCard)
+            userScore = await drawOneCard("YOU", deckId, userScore, userScoreDisplay, cardDisplay)
+        }
+    })
+    stay.addEventListener("click", async() =>{
+        if(!computerCard.firstChild){
+            computerScore = await drawOneCard("COMPUTER", deckId, computerScore, computerScoreDisplay, computerCard)
+            computerScore = await drawTwoCards("COMPUTER", deckId, computerScore, computerScoreDisplay, computerCard)
+        } else {
+            computerScore = await drawOneCard("COMPUTER", deckId, computerScore, computerScoreDisplay, computerCard)
         }
     })
 })

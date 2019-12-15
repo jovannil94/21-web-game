@@ -7,6 +7,14 @@ document.addEventListener("DOMContentLoaded" , () =>{
     let computerScoreDisplay = document.querySelector("#computerScoreDisplay");
     let computerCard = document.querySelector("#computerCard");
     let winner = document.querySelector("#winner");
+    //delay function I used in my first text based game
+    function wait(ms){
+        var start = new Date().getTime();
+        var end = start;
+        while(end < start + ms) {
+          end = new Date().getTime();
+       }
+     }
     let deckId
     let userScore = 0
     let computerScore = 0
@@ -40,18 +48,26 @@ document.addEventListener("DOMContentLoaded" , () =>{
         if(score < 21) {
             winner.innerText = ""
         } else if(score === 21){
-            winner.innerText= `${name} WIN`
+            winner.innerText= `${name} WINS`
             reset();
         } else {
             winner.innerText = `${name} BUSTED`
             reset();
         }
     }
-
+    const computerWins = (name, score, score2) =>{
+        if(score > score2 && score < 21){
+            winner.innerText= `${name} WINS`
+            reset();
+        }
+    }
     //check if draw
-    // checkDraw = (userScore, computerScore) =>{
-    //     if(userScore === computerScore)
-    // }
+    const checkDraw = (score, score2) =>{
+        if(score === score2){
+            winner.innerText = `DRAW`
+            reset();
+        }
+    }
     //sets values
     const valuesofCards = (value, score) =>{
         if(value === "JACK" || value === "QUEEN" || value === "KING"){
@@ -81,7 +97,7 @@ document.addEventListener("DOMContentLoaded" , () =>{
                 player.innerText = `Score: ${score}`
                 display.appendChild(image);
             }
-            checkScores(name, score)
+            // checkScores(name, score)
             return score
         }
         catch(err){
@@ -99,7 +115,7 @@ document.addEventListener("DOMContentLoaded" , () =>{
             image.src = imgUrl;
             player.innerText = `Score: ${score}`
             display.appendChild(image);
-            checkScores(name, score)
+            // checkScores(name, score)
             return score
         }
         catch(err){
@@ -110,20 +126,28 @@ document.addEventListener("DOMContentLoaded" , () =>{
     start.addEventListener("click", async () => {
         if(!cardDisplay.firstChild){
             userScore = await drawTwoCards("YOU", deckId, userScore, userScoreDisplay, cardDisplay)
+            checkScores("YOU", userScore)
         }
     })
 
     draw.addEventListener("click" , async () => {
         if(cardDisplay.firstChild){
-            userScore = await drawOneCard("YOU", deckId, userScore, userScoreDisplay, cardDisplay)
+            userScore = await drawOneCard("YOU", deckId, userScore, userScoreDisplay, cardDisplay);
+            checkScores("YOU", userScore);
         }
     })
     stay.addEventListener("click", async() =>{
         if(!computerCard.firstChild){
-            computerScore = await drawOneCard("COMPUTER", deckId, computerScore, computerScoreDisplay, computerCard)
-            computerScore = await drawTwoCards("COMPUTER", deckId, computerScore, computerScoreDisplay, computerCard)
+            computerScore = await drawOneCard("COMPUTER", deckId, computerScore, computerScoreDisplay, computerCard);
+            computerScore = await drawTwoCards("COMPUTER", deckId, computerScore, computerScoreDisplay, computerCard);
+            checkDraw(userScore, computerScore);
+            checkScores("COMPUTER", computerScore);
+            computerWins("COMPUTER", computerScore, userScore);
         } else {
-            computerScore = await drawOneCard("COMPUTER", deckId, computerScore, computerScoreDisplay, computerCard)
+            computerScore = await drawOneCard("COMPUTER", deckId, computerScore, computerScoreDisplay, computerCard);
+            checkDraw(userScore, computerScore);
+            checkScores("COMPUTER", computerScore);
+            computerWins("COMPUTER", computerScore, userScore);
         }
     })
 })

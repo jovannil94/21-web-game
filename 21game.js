@@ -125,29 +125,30 @@ document.addEventListener("DOMContentLoaded" , () =>{
 
     start.addEventListener("click", async () => {
         if(!cardDisplay.firstChild){
-            userScore = await drawTwoCards("YOU", deckId, userScore, userScoreDisplay, cardDisplay)
-            checkScores("YOU", userScore)
+            userScore = await drawTwoCards("HUMAN", deckId, userScore, userScoreDisplay, cardDisplay)
+            checkScores("HUMAN", userScore)
         }
     })
 
     draw.addEventListener("click" , async () => {
         if(cardDisplay.firstChild){
-            userScore = await drawOneCard("YOU", deckId, userScore, userScoreDisplay, cardDisplay);
-            checkScores("YOU", userScore);
+            userScore = await drawOneCard("HUMAN", deckId, userScore, userScoreDisplay, cardDisplay);
+            checkScores("HUMAN", userScore);
         }
     })
     stay.addEventListener("click", async() =>{
-        if(!computerCard.firstChild){
+        // if(!computerCard.firstChild){
             computerScore = await drawOneCard("COMPUTER", deckId, computerScore, computerScoreDisplay, computerCard);
             computerScore = await drawTwoCards("COMPUTER", deckId, computerScore, computerScoreDisplay, computerCard);
             checkDraw(userScore, computerScore);
             checkScores("COMPUTER", computerScore);
             computerWins("COMPUTER", computerScore, userScore);
-        } else {
-            computerScore = await drawOneCard("COMPUTER", deckId, computerScore, computerScoreDisplay, computerCard);
-            checkDraw(userScore, computerScore);
-            checkScores("COMPUTER", computerScore);
-            computerWins("COMPUTER", computerScore, userScore);
-        }
+            while(!winner.innerHTML.length) {
+                wait(1000);
+                computerScore = await drawOneCard("COMPUTER", deckId, computerScore, computerScoreDisplay, computerCard);
+                checkDraw(userScore, computerScore);
+                checkScores("COMPUTER", computerScore);
+                computerWins("COMPUTER", computerScore, userScore);
+            }
     })
 })

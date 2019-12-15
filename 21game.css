@@ -87,11 +87,12 @@ button {
 }
 #winner {
     grid-row: 5;
-    grid-column: 4/8;
+    grid-column: 3/8;
     margin-left: 20px;
-    font-size: 500%;
+    font-size: 300%;
     text-decoration: underline;
     color: white;
+    justify-self: center;
 }
 #newButton {
     display: grid;

@@ -7,17 +7,22 @@ document.addEventListener("DOMContentLoaded" , () =>{
     let computerScoreDisplay = document.querySelector("#computerScoreDisplay");
     let computerCard = document.querySelector("#computerCard");
     let winner = document.querySelector("#winner");
+    let audio1 = document.querySelector("#audio1");
+    let audio2 = document.querySelector("#audio2");
+    let audio3 = document.querySelector("#audio3");
+    let audioShuffleDeck = document.querySelector("#audioShuffleDeck");
+    let deckId
+    let userScore = 0
+    let computerScore = 0
+
     //delay function I used in my first text based game
     function wait(ms){
         var start = new Date().getTime();
         var end = start;
         while(end < start + ms) {
-          end = new Date().getTime();
-       }
-     }
-    let deckId
-    let userScore = 0
-    let computerScore = 0
+        end = new Date().getTime();
+        }
+    }
 
     //creating deck
     const getDeck = async () => {
@@ -40,6 +45,7 @@ document.addEventListener("DOMContentLoaded" , () =>{
         button.id = `newButton`
         document.body.appendChild(button)
         button.addEventListener("click" , () =>{
+            audioShuffleDeck.play();
             document.location.reload(true)
         })
     }
@@ -84,13 +90,13 @@ document.addEventListener("DOMContentLoaded" , () =>{
         return score
     }
 
-    //draws two cards on first hit
-    const drawTwoCards = async (name, id, score, player, display) =>{
+    //draws cards
+    const drawCards = async (num, name, id, score, player, display) =>{
         try{
-            let cardres = await axios.get(`https://deckofcardsapi.com/api/deck/${id}/draw/?count=2`);
-            for(let i = 0; i < 2; i++){
-                let twoCardValue = cardres.data.cards[i].value;
-                score = valuesofCards(twoCardValue, score);
+            let cardres = await axios.get(`https://deckofcardsapi.com/api/deck/${id}/draw/?count=${num}`);
+            for(let i = 0; i < num; i++){
+                let cardValue = cardres.data.cards[i].value;
+                score = valuesofCards(cardValue, score);
                 let imgUrl = cardres.data.cards[i].image;
                 let image = document.createElement("img");
                 image.src = imgUrl;
@@ -105,47 +111,34 @@ document.addEventListener("DOMContentLoaded" , () =>{
         }
     }
 
-    const drawOneCard = async (name, id, score, player, display) =>{
-        try {
-            let cardres = await axios.get(`https://deckofcardsapi.com/api/deck/${id}/draw/?count=1`);
-            let oneCardValue = cardres.data.cards[0].value;
-            score = valuesofCards(oneCardValue, score);
-            let imgUrl = cardres.data.cards[0].image;
-            let image = document.createElement("img");
-            image.src = imgUrl;
-            player.innerText = `Score: ${score}`
-            display.appendChild(image);
-            // checkScores(name, score)
-            return score
-        }
-        catch(err){
-            console.log(err)
-        }
-    }
-
     start.addEventListener("click", async () => {
         if(!cardDisplay.firstChild){
-            userScore = await drawTwoCards("HUMAN", deckId, userScore, userScoreDisplay, cardDisplay)
+            audio2.play();
+            wait(150);
+            userScore = await drawCards(2, "HUMAN", deckId, userScore, userScoreDisplay, cardDisplay)
             checkScores("HUMAN", userScore)
         }
     })
 
     draw.addEventListener("click" , async () => {
         if(cardDisplay.firstChild){
-            userScore = await drawOneCard("HUMAN", deckId, userScore, userScoreDisplay, cardDisplay);
+            audio1.play();
+            wait(50);
+            userScore = await drawCards(1, "HUMAN", deckId, userScore, userScoreDisplay, cardDisplay);
             checkScores("HUMAN", userScore);
         }
     })
     stay.addEventListener("click", async() =>{
         // if(!computerCard.firstChild){
-            computerScore = await drawOneCard("COMPUTER", deckId, computerScore, computerScoreDisplay, computerCard);
-            computerScore = await drawTwoCards("COMPUTER", deckId, computerScore, computerScoreDisplay, computerCard);
+            computerScore = await drawCards(3, "COMPUTER", deckId, computerScore, computerScoreDisplay, computerCard);
+            audio3.play();
             checkDraw(userScore, computerScore);
             checkScores("COMPUTER", computerScore);
             computerWins("COMPUTER", computerScore, userScore);
+            wait(500);
             while(!winner.innerHTML.length) {
-                wait(1000);
-                computerScore = await drawOneCard("COMPUTER", deckId, computerScore, computerScoreDisplay, computerCard);
+                audio1.play();
+                computerScore = await drawCards(1, "COMPUTER", deckId, computerScore, computerScoreDisplay, computerCard);
                 checkDraw(userScore, computerScore);
                 checkScores("COMPUTER", computerScore);
                 computerWins("COMPUTER", computerScore, userScore);
